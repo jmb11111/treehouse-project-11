@@ -61,11 +61,13 @@ router.get("/courses/:courseID", mid.userAuth, function (req, res, next) {
 
 router.post('/courses', mid.userAuth, function (req, res, next) {
     var course = new Course(req.body);
+    course.user = req.session.name;
     course.save(function (err, course) {
         if (err) return next(err);
         res.status(201);
         res.location("/");
-next()    });
+        next()
+    });
 });
 
 // update a course
@@ -92,18 +94,27 @@ router.put("/courses/:courseID", mid.userAuth, function (req, res, next) {
 router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next) {
     var review = new Review(req.body);
     review.user = req.session.name;
-    review.save(function(err,review){
-    if(err) return next(err);
-    else{
-        Course.findByIdAndUpdate(req.params.courseId,{ $push: {reviews: review._id}}, {new: true}, function(err, course){
-            if (err) return next(err)
-       
-            })
+    Course.findByIdAndUpdate(req.params.courseId,  { new: true }, function (err, course) {
+        if (err) { return next(err)}
+        else if (course.user.toString() !== req.session.name.toString()) {
+            
+            course.reviews.push(review._id)
+            course.save(function(err, course){
+                if(err) return (next(err))
+            });
+            review.save(function (err, review) {
+                if (err) return next(err);
+                res.location("/");
+                res.status(201);
+                res.json("done")
+            });
+        }
+        else {
+            let err = new Error("You can't review your own course silly!")
+            res.status(401);
+            return next(err);
         }
     })
-    res.status(201);
-    res.location("/");
-    res.json('done')
 });
 
 // routes for users
@@ -122,8 +133,8 @@ router.post("/users", function (req, res, next) {
     var user = new User(req.body);
     user.save(function (err, user) {
         if (err) return next(err);
+        res.location("/");
         res.status(201);
-        res.redirect("/");
     });
 });
 

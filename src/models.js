@@ -15,8 +15,12 @@ var CourseSchema = new Schema({
 	user: {type: Schema.ObjectId,
         ref: "User"
         },
-	title: String,
-	description: String,
+	title:{
+        type:String,
+        required: [true, "title is required"]},
+	description: {
+        type:String,
+        required: [true, "description is required"]},
     estimatedTime: String,
     materialsNeeded: String,
     reviews: [{type: Schema.ObjectId,
@@ -42,7 +46,8 @@ var ReviewSchema = new Schema({
     rating: Number,
     review: String,
     postedOn: {
-      $date: Date
+      date: {type:Date,
+        default: Date.now}
     }
   })
 
@@ -85,6 +90,7 @@ UserSchema.statics.authenticate = function(email,password,callback) {
  
         });
   }
+
 
 UserSchema.pre('save',function(next){
     let user = this;
