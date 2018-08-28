@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const routes = require("./routes");
 const mongoose = require("mongoose");
 const jsonParser = require("body-parser").json;
-var session = require('express-session');
+const session = require('express-session');
 
 const app = express();
 
@@ -29,8 +29,8 @@ app.use(function(req, res, next){
 });
 
 
-mongoose.connect("mongodb://localhost:27017/course-api");
-var db = mongoose.connection;
+mongoose.connect("mongodb://localhost:27017/course-api", {useNewUrlParser: true});
+const db = mongoose.connection;
 
 
 db.on("error", function(err){
@@ -85,3 +85,6 @@ app.use((err, req, res, next) => {
 const server = app.listen(app.get('port'), () => {
   console.log(`Express server is listening on port ${server.address().port}`);
 });
+
+
+module.exports = server

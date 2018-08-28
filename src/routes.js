@@ -5,8 +5,6 @@ var router = express.Router();
 var Course = require("./models").Course;
 var User = require("./models").User;
 var Review = require("./models").Review;
-
-var auth = require('basic-auth');
 var mid = require("./middleware")
 
 
@@ -14,7 +12,7 @@ var mid = require("./middleware")
 //Routes for Courses//
 
 // GET /courses
-router.get("/courses", mid.userAuth, function (req, res, next) {
+router.get("/courses", function (req, res, next) {
     Course.find({})
         .select("title")
         .exec(function (err, courses) {
@@ -53,7 +51,7 @@ router.param("courseID", function (req, res, next, id) {
         })
 });
 
-router.get("/courses/:courseID", mid.userAuth, function (req, res, next) {
+router.get("/courses/:courseID",mid.userAuth, function (req, res, next) {
     res.json(req.course);
 });
 
@@ -63,10 +61,12 @@ router.post('/courses', mid.userAuth, function (req, res, next) {
     var course = new Course(req.body);
     course.user = req.session.name;
     course.save(function (err, course) {
-        if (err) return next(err);
+        if (err){ 
+            return next(err);
+        }else{
         res.status(201);
         res.location("/");
-        next()
+        return next()}
     });
 });
 
@@ -84,7 +84,7 @@ router.put("/courses/:courseID", mid.userAuth, function (req, res, next) {
     }
         , function (err, result) {
             if (err) return next(err);
-            res.json(result);
+            next()
         });
 });
 
@@ -97,7 +97,6 @@ router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next
     Course.findByIdAndUpdate(req.params.courseId,  { new: true }, function (err, course) {
         if (err) { return next(err)}
         else if (course.user.toString() !== req.session.name.toString()) {
-            
             course.reviews.push(review._id)
             course.save(function(err, course){
                 if(err) return (next(err))
@@ -106,7 +105,7 @@ router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next
                 if (err) return next(err);
                 res.location("/");
                 res.status(201);
-                res.json("done")
+                next();
             });
         }
         else {
@@ -120,10 +119,14 @@ router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next
 // routes for users
 
 router.get("/users", mid.userAuth, (req, res, next) => {
-    console.log(req.session);
     User.find({
         _id: req.session.name
     }).exec(function (err, user) {
+        if(err) {
+            res.status(401);
+
+            return next(err);
+        }else
         res.json(user);
     })
 });
@@ -132,10 +135,14 @@ router.get("/users", mid.userAuth, (req, res, next) => {
 router.post("/users", function (req, res, next) {
     var user = new User(req.body);
     user.save(function (err, user) {
-        if (err) return next(err);
+        if (err) {
+            res.sendStatus(400)
+            return next(err);
+        }else{
         res.location("/");
         res.status(201);
-    });
+        next()
+     } });
 });
 
 
