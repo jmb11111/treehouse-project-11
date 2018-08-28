@@ -17,12 +17,11 @@ let should = chai.should();
       it(' should get user info of currently authenticated user', (done) => {
         request.agent(app)
             .get('/api/users')
-            .auth('josh@blasbalg.com', 'matthew')
+            .auth('joe@smith.com', 'password')
             .end((err, res) => {
-                console.log(res.body[0].emailAddress)
                   expect(res.statusCode).to.equal(200);
                   expect(res.body).to.be.a('array');
-                  expect(res.body[0]).to.have.property("emailAddress").eql("josh@blasbalg.com");
+                  expect(res.body[0]).to.have.property("emailAddress").eql("joe@smith.com");
               done();
             });
       });
