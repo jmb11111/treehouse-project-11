@@ -51,7 +51,7 @@ router.param("courseID", function (req, res, next, id) {
         })
 });
 
-router.get("/courses/:courseID",mid.userAuth, function (req, res, next) {
+router.get("/courses/:courseID", function (req, res, next) {
     res.json(req.course);
 });
 
@@ -66,7 +66,7 @@ router.post('/courses', mid.userAuth, function (req, res, next) {
         }else{
         res.status(201);
         res.location("/");
-        return next()}
+        res.end()}
     });
 });
 
@@ -84,7 +84,10 @@ router.put("/courses/:courseID", mid.userAuth, function (req, res, next) {
     }
         , function (err, result) {
             if (err) return next(err);
-            next()
+            res.status(204);
+            res.location("/");
+            res.end();
+           
         });
 });
 
@@ -97,16 +100,20 @@ router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next
     Course.findByIdAndUpdate(req.params.courseId,  { new: true }, function (err, course) {
         if (err) { return next(err)}
         else if (course.user.toString() !== req.session.name.toString()) {
-            course.reviews.push(review._id)
-            course.save(function(err, course){
-                if(err) return (next(err))
-            });
+
             review.save(function (err, review) {
                 if (err) return next(err);
-                res.location("/");
+                course.reviews.push(review._id)
+                course.save(function(err, course){
+                    if(err) return (next(err))
+                });
                 res.status(201);
-                next();
+                res.location("/");
+                res.end();
+               
+                
             });
+            
         }
         else {
             let err = new Error("You can't review your own course silly!")
@@ -124,7 +131,7 @@ router.get("/users", mid.userAuth, (req, res, next) => {
     }).exec(function (err, user) {
         if(err) {
             res.status(401);
-
+            
             return next(err);
         }else
         res.json(user);
