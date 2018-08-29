@@ -6,6 +6,7 @@ var User = require("../models").User;
 
 function userAuth(req,res,next){
     const user = auth(req);
+    if(user){
     if(user.name && user.pass){
         User.authenticate(user.name, user.pass, function(error,user){
             if(!user){
@@ -20,6 +21,11 @@ function userAuth(req,res,next){
         })
     }else{
         let err = new Error("Email and Password required");
+        err.status=401;
+        return next(err)
+    }}
+    else{
+        let err = new Error("You are not authorized to view this page");
         err.status=401;
         return next(err)
     }

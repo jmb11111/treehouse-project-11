@@ -43,7 +43,7 @@ db.once("open", function(){
 
 app.use(session( {
   secret: 'treehouse loves you',
-  resave: true,
+  resave: false,
   saveUninitialized: false
 }));
 

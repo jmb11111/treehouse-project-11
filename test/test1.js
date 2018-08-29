@@ -32,7 +32,7 @@ let should = chai.should();
   describe('/GET course info', () => {
     it(' should return a 401 status code and incorrect user info message', (done) => {
       request.agent(app)
-          .get('/api/courses/57029ed4795118be119cc43d')
+          .get('/api/users')
           .auth('bad', 'credentials')
           .end((err, res) => {
                 expect(res.statusCode).to.equal(401);

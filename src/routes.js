@@ -126,16 +126,23 @@ router.post("/courses/:courseId/reviews", mid.userAuth, function (req, res, next
 // routes for users
 
 router.get("/users", mid.userAuth, (req, res, next) => {
+console.log(req);
+    if(req.session.name){
     User.find({
         _id: req.session.name
-    }).exec(function (err, user) {
+    })
+    .exec(function (err, user) {
         if(err) {
             res.status(401);
-            
             return next(err);
         }else
         res.json(user);
-    })
+    })}
+    else{
+        let err = new Error("Must be signed in!");
+        err.status(401);
+        next(err);
+    }
 });
 
 
