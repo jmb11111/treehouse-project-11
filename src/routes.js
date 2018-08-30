@@ -155,7 +155,7 @@ router.post("/users", function (req, res, next) {
         }else{
         res.location("/");
         res.status(201);
-        next()
+        res.end();
      } });
 });
 
